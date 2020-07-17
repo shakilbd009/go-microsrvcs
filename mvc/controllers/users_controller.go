@@ -1,40 +1,31 @@
 package controllers
 
 import (
-	"encoding/json"
 	"net/http"
 	"strconv"
 
+	"github.com/gin-gonic/gin"
 	"github.com/shakilbd009/go-microsrvcs/mvc/services"
 	"github.com/shakilbd009/go-microsrvcs/mvc/utils"
 )
 
 //GetUser returns
-func GetUser(resp http.ResponseWriter, req *http.Request) {
+func GetUser(c *gin.Context) {
 
-	userID, err := strconv.ParseInt(req.URL.Query().Get("user_id"), 10, 64)
+	userID, err := strconv.ParseInt(c.Param("user_id"), 10, 64)
 	if err != nil {
 		appErr := utils.ApplicationError{
 			Message:    "user_id must be a number",
 			StatusCode: http.StatusNotFound,
 			Code:       "bad_request",
 		}
-		jsonData, _ := json.MarshalIndent(appErr, "", "  ")
-		resp.Header().Set("Content-Type", "application/json")
-		resp.WriteHeader(appErr.StatusCode)
-		resp.Write(jsonData)
+		utils.Respond(c, appErr.StatusCode, appErr)
 		return
 	}
-	user, appErr := services.GetUser(userID)
+	user, appErr := services.UsersService.GetUser(userID)
 	if appErr != nil {
-		jsonData, _ := json.MarshalIndent(appErr, "", "  ")
-		resp.Header().Set("Content-Type", "application/json")
-		resp.WriteHeader(appErr.StatusCode)
-		resp.Write(jsonData)
+		utils.Respond(c, appErr.StatusCode, appErr)
 		return
 	}
-	jsonData, _ := json.MarshalIndent(user, "", "  ")
-	resp.Header().Set("Content-Type", "application/json")
-	resp.WriteHeader(200)
-	resp.Write(jsonData)
+	utils.Respond(c, http.StatusOK, user)
 }

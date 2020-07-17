@@ -15,7 +15,8 @@ func init() {
 //StartApp starts the application
 func StartApp() {
 
-	getUrls()
+	mapUrls()
+
 	if err := router.Run(":8081"); err != nil {
 		panic(err)
 	}
